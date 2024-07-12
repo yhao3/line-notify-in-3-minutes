@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Line Notify In 3 Minutes</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Line Notify In 3 Minutes
+            <a href="https://github.com/yhao3/line-notify-in-3-minutes" target="_blank">
+                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" class="github-icon">
+            </a>
+        </h1>
+        <div class="author-info">
+            <span>Created by <a href="https://github.com/yhao3" target="_blank">Hao</a></span>
+        </div>
+    </header>
+
+    <div id="send-message-container" style="display: none;">
+        <form th:action="@{/submitMessage}" method="post">
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="4" cols="50" required oninput="checkInput()"></textarea>
+            <button type="submit" id="sendButton" class="disabled" disabled>Send</button>
+        </form>
+    </div>
+
+    <div id="auth-container" class="button-container" style="justify-content: center;">
+        <button id="authorizeButton" onclick="authorize()" class="auth-button" style="display: none;">Authorize Line Notify</button>
+        <button id="revokeButton" onclick="revoke()" class="revoke-button" style="display: none;">Revoke Access Token</button>
+    </div>
+
+    <div th:if="${status}" id="statusMessage" class="status-message">
+        <p th:text="${status}"></p>
+    </div>
+</div>
+
+<script>
+    function checkInput() {
+        const message = document.getElementById('message').value;
+        const sendButton = document.getElementById('sendButton');
+        sendButton.disabled = message.trim() === '';
+        sendButton.classList.toggle('disabled', message.trim() === '');
+    }
+
+    function authorize() {
+        window.location.href = "/api/line-notify/authorize";
+    }
+
+    function revoke() {
+        fetch('/api/line-notify/revoke', {
+            method: 'POST'
+        }).then(response => {
+            if (response.ok) {
+                showStatusMessage('Access token revoked successfully', 'success');
+                setTimeout(() => {
+                    location.reload(); // 刷新頁面以更新按鈕狀態
+                }, 3000);
+            } else {
+                showStatusMessage('Failed to revoke access token', 'error');
+            }
+        });
+    }
+
+    function showStatusMessage(message, type) {
+        const statusMessage = document.createElement('div');
+        statusMessage.className = `status-message ${type}`;
+        statusMessage.textContent = message;
+        document.body.appendChild(statusMessage);
+        setTimeout(() => {
+            statusMessage.style.opacity = '0';
+            statusMessage.style.transition = 'opacity 0.5s';
+            setTimeout(() => {
+                statusMessage.remove();
+            }, 500);
+        }, 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const statusMessage = document.getElementById('statusMessage');
+        if (statusMessage) {
+            setTimeout(() => {
+                statusMessage.style.opacity = '0';
+                statusMessage.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    statusMessage.remove();
+                }, 500);
+            }, 3000);
+        }
+
+        // 檢查是否已授權
+        fetch('/api/line-notify/is-authorized', {
+            method: 'GET'
+        }).then(response => response.json())
+        .then(data => {
+            const authorizeButton = document.getElementById('authorizeButton');
+            const revokeButton = document.getElementById('revokeButton');
+            const sendMessageContainer = document.getElementById('send-message-container');
+            if (data === true) {
+                revokeButton.style.display = 'block';
+                sendMessageContainer.style.display = 'block';
+            } else {
+                authorizeButton.style.display = 'block';
+            }
+        });
+    });
+</script>
+</body>
+</html>

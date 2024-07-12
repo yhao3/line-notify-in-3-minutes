@@ -1,0 +1,9 @@
+version: "3"
+services:
+  line-notify-in-3-minutes:
+    image: kyrieeeee2/line-notify-in-3-minutes:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
