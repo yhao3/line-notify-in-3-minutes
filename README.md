@@ -56,4 +56,5 @@ docker compose up -d
    ![Authorize Line Notify](./docs/images/screenshot-02.png)
 4. Click on the `Agree and connect` button, and you will be redirected back to the application.
 5. Now you can send notifications to the group or chat you have chosen.
+   ![Send Notification](./docs/images/screenshot-03.png)
 6. Have fun!
